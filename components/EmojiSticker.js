@@ -10,6 +10,7 @@ import Animated, {
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 export default function EmojiSticker({ imageSize, stickerSource }) {
+  const scaleImage = useSharedValue(imageSize);
   const onDoubleTap = useAnimatedGestureHandler({
     onActive: () => {
       if (scaleImage.value !== imageSize * 2) {
@@ -24,8 +25,6 @@ export default function EmojiSticker({ imageSize, stickerSource }) {
       height: withSpring(scaleImage.value),
     };
   });
-
-  const scaleImage = useSharedValue(imageSize);
 
   return (
     <View style={{ top: -350 }}>

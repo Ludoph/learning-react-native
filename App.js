@@ -1,9 +1,10 @@
 import * as MediaLibrary from "expo-media-library";
+import domtoimage from "dom-to-image";
 
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useState, useRef } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Platform } from "react-native";
 
 import Button from "./components/Button";
 import ImageViewer from "./components/ImageViewer";
@@ -53,18 +54,34 @@ export default function App() {
   };
 
   const onSaveImageAsync = async () => {
-    try {
-      const localUri = await captureRef(imageRef, {
-        height: 440,
-        quality: 1,
-      });
-
-      await MediaLibrary.saveToLibraryAsync(localUri);
-      if (localUri) {
-        alert("Saved!");
+    if (Platform.OS !== "web") {
+      try {
+        const localUri = await captureRef(imageRef, {
+          height: 440,
+          quality: 1,
+        });
+        await MediaLibrary.saveToLibraryAsync(localUri);
+        if (localUri) {
+          alert("Saved!");
+        }
+      } catch (e) {
+        console.log(e);
       }
-    } catch (e) {
-      console.log(e);
+    } else {
+      try {
+        const dataUrl = await domtoimage.toJpeg(imageRef.current, {
+          quality: 0.95,
+          width: 320,
+          height: 440,
+        });
+
+        let link = document.createElement("a");
+        link.download = "sticker-smash.jpeg";
+        link.href = dataUrl;
+        link.click();
+      } catch (e) {
+        console.log(e);
+      }
     }
   };
 
@@ -115,7 +132,7 @@ export default function App() {
                 onCloseModal={onModalClose}
               />
             </EmojiPicker>
-            <StatusBar style="auto" />
+            <StatusBar style="light" />
           </View>
         </View>
       </View>
@@ -128,14 +145,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#25292e",
     alignItems: "center",
+    justifyContent: "center",
   },
   imageContainer: {
     flex: 1,
-    paddingTop: 58,
+    paddingTop: 70,
+    alignItems: "center",
   },
   footerContainer: {
     flex: 1 / 3,
     alignItems: "center",
+    paddingTop: 70,
   },
   optionsContainer: {
     position: "absolute",
